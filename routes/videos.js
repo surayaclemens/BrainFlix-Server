@@ -9,8 +9,7 @@ const videos = JSON.parse(videosFile);
 
 //GETTING ALL VIDEOS
 router.get('/', (req, res) => {
-    // create new empty array to push new video to
-    // for each video, make an object with the properties I want to send
+    // create new empty array to push new video to; for each video, make an object with the properties I want to send
    const videoArray = []
    videos.forEach(video => {
        videoArray.push({
@@ -43,8 +42,15 @@ router.get('/:videoId', (req, res) => {
 
 //POSTING NEW VIDEO (UPLOADED) TO API/JSON   
 router.post("/",(req, res) => {
-        //make a new video object that adds unique id to each video requested (by spreading body of request and adding uuid)
-        const newVideoDetails = {...req.body, id: uuid(), channel: "My Channel", likes: "200000", image: "http://localhost:8000/", views: "20000", timestamp: new Date()};
+        //make a new video object that adds unique id, other properties to each video requested (by spreading body of request and adding the stuff)
+        const newVideoDetails = {...req.body, 
+            id: uuid(), 
+            channel: "$uraya", 
+            likes: "200000", 
+            image: "http://localhost:8000/images/new.jpg",
+            views: "20000", 
+            timestamp: new Date()
+        };
 
         //making new array of all the videos (including new uploads) by spreading existing videos array and adding the newVideoDetails made above
         let allVideos = [...videos, newVideoDetails];
@@ -52,8 +58,7 @@ router.post("/",(req, res) => {
         //writing the array to the json file, stringified first
         fs.writeFileSync('./data/videos.json', JSON.stringify(allVideos));
 
-
-        //success status
+        //success status and sending the info to client
         res.status(201).json(allVideos)
     });
 
