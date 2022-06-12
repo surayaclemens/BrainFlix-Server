@@ -3,54 +3,48 @@ const router = express.Router();
 const fs = require('fs');
 const {v4: uuid } = require('uuid')
 const videosFile = fs.readFileSync('./data/videos.json');
-
+ // parsing the videosFile from the json file in data folder, storing in variable to use
+const videos = JSON.parse(videosFile);
 
 
 //GETTING ALL VIDEOS
 router.get('/', (req, res) => {
-    // parsing the videosFile from the json file in data folder, storing in variable to use
-    const videos = JSON.parse(videosFile)
-
-    // map through json file videos and make new object with just values I want to use
-    const videoObject = videos.map(video => {
-        return {
-            id: video.id,
-            title: video.title,
-            channel: video.channel,
-            image: video.image
-        };
-    });
-    // this is still inside the get -- send json object of newly narrowed down videoObject content as response for client
-    res.json(videoObject);
+    // create new empty array to push new video to
+    // for each video, make an object with the properties I want to send
+   const videoArray = []
+   videos.forEach(video => {
+       videoArray.push({
+                id: video.id,
+                title: video.title,
+                channel: video.channel,
+                image: video.image
+            })
+   })
+    // send array of videos that has an object for each video as response for client
+    res.json(videoArray);
 });
 
 
 //GETTING SINGLE SELECTED VIDEO FOR HERO PLAYER
-router.get('/:videoId'), (req, res) => {
-    //following from demo...why do you have to do this each time? is it not accessible outside each get function?
-    const videos = JSON.parse(videosFile);
+router.get('/:videoId', (req, res) => {
 
-    //go through videos from list in json and find the video where the id = the one that matches params with the url request?
+    //go through videos from list in json and find the video where the id = the one that matches params with the url request
     const singleVideo = videos.find((video) => video.id === req.params.videoId);
 
     //if it doesn't find a video that matches in id, give 404 status
     if (!singleVideo) {
         res.status(404).send("Video not found");
-        return;
     }
-    // this is still inside the get -- send json object of the single video selected through find() as response for client
+   
+    // send json object of the single video selected through find() as response for client
     res.json(singleVideo);
-}
+})
 
 
 //POSTING NEW VIDEO (UPLOADED) TO API/JSON   
-router.post((req, res) => {
+router.post("/",(req, res) => {
         //make a new video object that adds unique id to each video requested (by spreading body of request and adding uuid)
-        const newVideoDetails = {...req.body, id: uuid()};
-        // console.log(newVideoDetails);
-
-        //this gets repeated again...
-        const videos = JSON.parse(videosFile)
+        const newVideoDetails = {...req.body, id: uuid(), channel: "My Channel", likes: "200000", image: "http://localhost:8000/", views: "20000", timestamp: new Date()};
 
         //making new array of all the videos (including new uploads) by spreading existing videos array and adding the newVideoDetails made above
         let allVideos = [...videos, newVideoDetails];
@@ -58,8 +52,10 @@ router.post((req, res) => {
         //writing the array to the json file, stringified first
         fs.writeFileSync('./data/videos.json', JSON.stringify(allVideos));
 
-        //success status -- what's the second part again?
-        res.status(201).json(newVideoDetails)
+
+        //success status
+        res.status(201).json(allVideos)
     });
+
 
 module.exports = router;

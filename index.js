@@ -14,6 +14,6 @@ app.use('/videos', videoRoutes);
 
 
 
-app.listen(8080, () => {
-    console.log("Server is listening on port 8080");
+app.listen(8000, () => {
+    console.log("Server is listening on port 8000");
 });
